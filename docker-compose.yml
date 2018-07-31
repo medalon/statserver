@@ -1,0 +1,24 @@
+doversion: '2'
+
+services:
+  statserver-db:
+    image: percona/percona-server:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root2507
+      - MYSQL_DATABASE=stats
+    networks: 
+      - statserver
+    volumes:
+      - /opt/mysql:/var/lib/mysql
+  
+  statserver:
+    build: .
+    environment:
+      - DATABASE_URL=root:root2507@(statserver-db:3306)/stats?multiStatements=true&parseTime=true
+    networks: 
+      - statserver
+    ports:
+      - 1323:1323
+
+networks: 
+  statserver:
