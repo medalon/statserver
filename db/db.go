@@ -9,4 +9,5 @@ type DB interface {
 	ListPrerolls() ([]model.Preroll, error)
 	UpdatePreroll(s model.Preroll) error
 	DeletePreroll(id int64) error
+	SelectPrerollByDate(id int64, start, end string) ([]model.Preroll, error)
 }

@@ -61,6 +61,29 @@ func (s *ServerDB) StatPreroll(c echo.Context) error {
 	return c.String(http.StatusOK, "id: "+id+", act: "+act+", name: "+name)
 }
 
+// GetPrerollStat ...
+func (s *ServerDB) GetPrerollStat(c echo.Context) error {
+	id := c.Param("id")
+	rid, _ := strconv.ParseInt(id, 10, 64)
+	stdate := c.QueryParam("start")
+	endate := c.QueryParam("end")
+
+	stmt, err := s.db.SelectPrerollByDate(rid, stdate, endate)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	var p []*model.Preroll
+
+	for _, k := range stmt {
+		kl := &model.Preroll{ID: k.ID, PrerollID: k.PrerollID, Name: k.Name, Date: k.Date, ShowKg: k.ShowKg, ShowWr: k.ShowWr, ClickKg: k.ClickKg, ClickWr: k.ClickWr}
+		fmt.Println(kl)
+		p = append(p, kl)
+	}
+	fmt.Println(p)
+	return c.JSON(http.StatusOK, p)
+}
+
 // WritePrerollToDb ...
 func (s *ServerDB) WritePrerollToDb(preid, name, act string, geo int) error {
 	t1 := time.Now()

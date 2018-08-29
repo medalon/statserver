@@ -2,12 +2,12 @@ package model
 
 // Preroll ...
 type Preroll struct {
-	ID        int64  `db:"id"`
-	PrerollID int64  `db:"preroll_id"`
-	Name      string `db:"name"`
-	Date      string `db:"date"`
-	ShowKg    int64  `db:"show_kg"`
-	ShowWr    int64  `db:"show_wr"`
-	ClickKg   int64  `db:"click_kg"`
-	ClickWr   int64  `db:"click_wr"`
+	ID        int64  `db:"id" json:"id" xml:"id"`
+	PrerollID int64  `db:"preroll_id" json:"preroll_id" xml:"preroll_id"`
+	Name      string `db:"name" json:"name" xml:"name"`
+	Date      string `db:"date" json:"date" xml:"date"`
+	ShowKg    int64  `db:"show_kg" json:"show_kg" xml:"show_kg"`
+	ShowWr    int64  `db:"show_wr" json:"show_wr" xml:"show_wr"`
+	ClickKg   int64  `db:"click_kg" json:"click_kg" xml:"click_kg"`
+	ClickWr   int64  `db:"click_wr" json:"click_wr" xml:"click_wr"`
 }

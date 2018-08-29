@@ -30,6 +30,7 @@ func main() {
 	e.GET("/banner/:id", s.StatBanner)
 	e.GET("/preroll/:id", s.StatPreroll)
 
+	e.GET("/getpreroll/:id", s.GetPrerollStat)
 	e.Logger.Fatal(e.Start(":1323"))
 
 }

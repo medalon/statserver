@@ -77,3 +77,10 @@ func (m *MySQL) DeletePreroll(id int64) error {
 	_, err := m.conn.Exec("DELETE FROM `prerolls` WHERE id=?", id)
 	return err
 }
+
+// SelectPrerollByDate selects preroll entry from database
+func (m *MySQL) SelectPrerollByDate(id int64, start, end string) ([]model.Preroll, error) {
+	s := []model.Preroll{}
+	err := m.conn.Get(&s, "SELECT * FROM `prerolls` WHERE `preroll_id`=? AND `date`>=? AND `date`<=?", id, start, end)
+	return s, err
+}
