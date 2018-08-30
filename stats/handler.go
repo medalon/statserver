@@ -73,15 +73,8 @@ func (s *ServerDB) GetPrerollStat(c echo.Context) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	var p []*model.Preroll
 
-	for _, k := range stmt {
-		kl := &model.Preroll{ID: k.ID, PrerollID: k.PrerollID, Name: k.Name, Date: k.Date, ShowKg: k.ShowKg, ShowWr: k.ShowWr, ClickKg: k.ClickKg, ClickWr: k.ClickWr}
-		fmt.Println(kl)
-		p = append(p, kl)
-	}
-	fmt.Println(p)
-	return c.JSON(http.StatusOK, p)
+	return c.JSON(http.StatusOK, stmt)
 }
 
 // WritePrerollToDb ...
