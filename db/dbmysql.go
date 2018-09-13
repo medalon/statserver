@@ -84,3 +84,63 @@ func (m *MySQL) SelectPrerollByDate(id int64, start, end string) ([]model.Prerol
 	err := m.conn.Select(&s, "SELECT * FROM `prerolls` WHERE `preroll_id`=? AND `date`>=? AND `date`<=?", id, start, end)
 	return s, err
 }
+
+// *** for banners *** //
+
+// CreateBanner creates banner entry in database
+func (m *MySQL) CreateBanner(s model.Banner) (int64, error) {
+	res, err := m.conn.Exec(
+		"INSERT INTO `banners` (`banner_id`, `name`, `date`, `show_kg`, `show_wr`, `click_kg`, `click_wr`) VALUES (?, ?, ?, ?, ?, ?, ?)", s.BannerID, s.Name, s.Date, s.ShowKg, s.ShowWr, s.ClickKg, s.ClickWr,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+// SelectBanner selects banner entry from database
+func (m *MySQL) SelectBanner(p model.Banner) (model.Banner, error) {
+	var s model.Banner
+	err := m.conn.Get(&s, "SELECT `id`, `show_kg`, `show_wr`, `click_kg`, `click_wr` FROM `banners` WHERE `banner_id`=? AND `date`=?", p.BannerID, p.Date)
+	return s, err
+}
+
+// ListBanners returns array of banners entries from database
+func (m *MySQL) ListBanners() ([]model.Banner, error) {
+	banners := []model.Banner{}
+	err := m.conn.Select(&banners, "SELECT * FROM `banners`")
+	return banners, err
+}
+
+// UpdateBanner updates banner entry in database
+func (m *MySQL) UpdateBanner(s model.Banner) error {
+	tx := m.conn.MustBegin()
+	tx.MustExec(
+		"UPDATE `banners` SET `banner_id` = ?, `name` = ?, `date` = ?, `show_kg` = ?, `show_wr` = ?, `click_kg` = ?, `click_wr` = ? WHERE `id` = ?",
+		s.BannerID, s.Name, s.Date, s.ShowKg, s.ShowWr, s.ClickKg, s.ClickWr, s.ID,
+	)
+	err := tx.Commit()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteBanner deletes banner entry from database
+func (m *MySQL) DeleteBanner(id int64) error {
+	_, err := m.conn.Exec("DELETE FROM `banners` WHERE id=?", id)
+	return err
+}
+
+// SelectBannerByDate selects banners entries from database
+func (m *MySQL) SelectBannerByDate(id int64, start, end string) ([]model.Banner, error) {
+	s := []model.Banner{}
+	err := m.conn.Select(&s, "SELECT * FROM `banners` WHERE `banner_id`=? AND `date`>=? AND `date`<=?", id, start, end)
+	return s, err
+}

@@ -33,12 +33,22 @@ func NewServerDB(c *config.StatsConfig) (*ServerDB, error) {
 
 // StatBanner ...
 func (s *ServerDB) StatBanner(c echo.Context) error {
+	var geo int
 	id := c.Param("id")
 
 	act := c.QueryParam("act")
-	pos := c.QueryParam("pos")
+	mesto := c.QueryParam("mesto")
+	name := c.QueryParam("name")
 
-	return c.String(http.StatusOK, "id: "+id+", act: "+act+", pos: "+pos)
+	if mesto == "kg" {
+		geo = 1
+	} else {
+		geo = 0
+	}
+
+	_ = s.WriteBannerToDb(id, name, act, geo)
+
+	return c.String(http.StatusOK, "id: "+id+", act: "+act+", name: "+name)
 }
 
 // StatPreroll ...
@@ -143,6 +153,80 @@ func (s *ServerDB) WritePrerollToDb(preid, name, act string, geo int) error {
 		u.ID = stmt.ID
 		u.Name = name
 		err := s.db.UpdatePreroll(u)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// WriteBannerToDb ...
+func (s *ServerDB) WriteBannerToDb(banid, name, act string, geo int) error {
+	t1 := time.Now()
+	dtime := gostrftime.Format("%Y-%m-%d", t1)
+
+	var u model.Banner
+	u.BannerID, _ = strconv.ParseInt(banid, 10, 64)
+	u.Date = dtime
+
+	stmt, err := s.db.SelectBanner(u)
+	switch {
+	case err == sql.ErrNoRows:
+		if geo == 1 {
+			if act == "click" {
+				u.ShowKg = 0
+				u.ClickKg = 1
+			} else {
+				u.ShowKg = 1
+				u.ClickKg = 0
+			}
+			u.ShowWr = 0
+			u.ClickWr = 0
+		} else {
+			if act == "click" {
+				u.ShowWr = 0
+				u.ClickWr = 1
+			} else {
+				u.ShowWr = 1
+				u.ClickWr = 0
+			}
+			u.ShowKg = 0
+			u.ClickKg = 0
+		}
+		u.Name = name
+		_, err := s.db.CreateBanner(u)
+		if err != nil {
+			fmt.Println(err)
+		}
+	case err != nil:
+		return err
+
+	case stmt.ID > 0:
+		if geo == 1 {
+			if act == "click" {
+				u.ShowKg = stmt.ShowKg
+				u.ClickKg = stmt.ClickKg + 1
+			} else {
+				u.ShowKg = stmt.ShowKg + 1
+				u.ClickKg = stmt.ClickKg
+			}
+			u.ShowWr = stmt.ShowWr
+			u.ClickWr = stmt.ClickWr
+		} else {
+			if act == "click" {
+				u.ShowWr = stmt.ShowWr
+				u.ClickWr = stmt.ClickWr + 1
+			} else {
+				u.ShowWr = stmt.ShowWr + 1
+				u.ClickWr = stmt.ClickWr
+			}
+			u.ShowKg = stmt.ShowKg
+			u.ClickKg = stmt.ClickKg
+		}
+		u.ID = stmt.ID
+		u.Name = name
+		err := s.db.UpdateBanner(u)
 		if err != nil {
 			return err
 		}

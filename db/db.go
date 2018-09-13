@@ -10,4 +10,11 @@ type DB interface {
 	UpdatePreroll(s model.Preroll) error
 	DeletePreroll(id int64) error
 	SelectPrerollByDate(id int64, start, end string) ([]model.Preroll, error)
+
+	CreateBanner(s model.Banner) (int64, error)
+	SelectBanner(p model.Banner) (model.Banner, error)
+	ListBanners() ([]model.Banner, error)
+	UpdateBanner(s model.Banner) error
+	DeleteBanner(id int64) error
+	SelectBannerByDate(id int64, start, end string) ([]model.Banner, error)
 }
