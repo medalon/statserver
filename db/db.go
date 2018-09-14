@@ -16,5 +16,5 @@ type DB interface {
 	ListBanners() ([]model.Banner, error)
 	UpdateBanner(s model.Banner) error
 	DeleteBanner(id int64) error
-	SelectBannerByDate(id int64, start, end string) ([]model.Banner, error)
+	SelectBannerByDate(id int64, btype, start, end string) ([]model.Banner, error)
 }

@@ -10,4 +10,5 @@ type Banner struct {
 	ShowWr   int64  `db:"show_wr" json:"show_wr" xml:"show_wr"`
 	ClickKg  int64  `db:"click_kg" json:"click_kg" xml:"click_kg"`
 	ClickWr  int64  `db:"click_wr" json:"click_wr" xml:"click_wr"`
+	Btype    string `db:"btype" json:"btype" xml:"btype"`
 }

@@ -39,6 +39,7 @@ func (s *ServerDB) StatBanner(c echo.Context) error {
 	act := c.QueryParam("act")
 	mesto := c.QueryParam("mesto")
 	name := c.QueryParam("name")
+	btype := c.QueryParam("type")
 
 	if mesto == "kg" {
 		geo = 1
@@ -46,7 +47,7 @@ func (s *ServerDB) StatBanner(c echo.Context) error {
 		geo = 0
 	}
 
-	_ = s.WriteBannerToDb(id, name, act, geo)
+	_ = s.WriteBannerToDb(id, name, act, btype, geo)
 
 	return c.String(http.StatusOK, "id: "+id+", act: "+act+", name: "+name)
 }
@@ -93,8 +94,8 @@ func (s *ServerDB) GetBannerStat(c echo.Context) error {
 	rid, _ := strconv.ParseInt(id, 10, 64)
 	stdate := c.QueryParam("start")
 	endate := c.QueryParam("end")
-
-	stmt, err := s.db.SelectBannerByDate(rid, stdate, endate)
+	btype := c.QueryParam("type")
+	stmt, err := s.db.SelectBannerByDate(rid, btype, stdate, endate)
 
 	if err != nil {
 		fmt.Println(err)
@@ -178,13 +179,14 @@ func (s *ServerDB) WritePrerollToDb(preid, name, act string, geo int) error {
 }
 
 // WriteBannerToDb ...
-func (s *ServerDB) WriteBannerToDb(banid, name, act string, geo int) error {
+func (s *ServerDB) WriteBannerToDb(banid, name, act, btype string, geo int) error {
 	t1 := time.Now()
 	dtime := gostrftime.Format("%Y-%m-%d", t1)
 
 	var u model.Banner
 	u.BannerID, _ = strconv.ParseInt(banid, 10, 64)
 	u.Date = dtime
+	u.Btype = btype
 
 	stmt, err := s.db.SelectBanner(u)
 	switch {
@@ -211,6 +213,7 @@ func (s *ServerDB) WriteBannerToDb(banid, name, act string, geo int) error {
 			u.ClickKg = 0
 		}
 		u.Name = name
+
 		_, err := s.db.CreateBanner(u)
 		if err != nil {
 			fmt.Println(err)
@@ -242,6 +245,7 @@ func (s *ServerDB) WriteBannerToDb(banid, name, act string, geo int) error {
 		}
 		u.ID = stmt.ID
 		u.Name = name
+
 		err := s.db.UpdateBanner(u)
 		if err != nil {
 			return err

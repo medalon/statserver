@@ -90,7 +90,7 @@ func (m *MySQL) SelectPrerollByDate(id int64, start, end string) ([]model.Prerol
 // CreateBanner creates banner entry in database
 func (m *MySQL) CreateBanner(s model.Banner) (int64, error) {
 	res, err := m.conn.Exec(
-		"INSERT INTO `banners` (`banner_id`, `name`, `date`, `show_kg`, `show_wr`, `click_kg`, `click_wr`) VALUES (?, ?, ?, ?, ?, ?, ?)", s.BannerID, s.Name, s.Date, s.ShowKg, s.ShowWr, s.ClickKg, s.ClickWr,
+		"INSERT INTO `banners` (`banner_id`, `name`, `date`, `show_kg`, `show_wr`, `click_kg`, `click_wr`, `btype`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", s.BannerID, s.Name, s.Date, s.ShowKg, s.ShowWr, s.ClickKg, s.ClickWr, s.Btype,
 	)
 	if err != nil {
 		return 0, err
@@ -105,7 +105,7 @@ func (m *MySQL) CreateBanner(s model.Banner) (int64, error) {
 // SelectBanner selects banner entry from database
 func (m *MySQL) SelectBanner(p model.Banner) (model.Banner, error) {
 	var s model.Banner
-	err := m.conn.Get(&s, "SELECT `id`, `show_kg`, `show_wr`, `click_kg`, `click_wr` FROM `banners` WHERE `banner_id`=? AND `date`=?", p.BannerID, p.Date)
+	err := m.conn.Get(&s, "SELECT `id`, `show_kg`, `show_wr`, `click_kg`, `click_wr`, `btype` FROM `banners` WHERE `banner_id`=? AND `date`=? AND `btype`=?", p.BannerID, p.Date, p.Btype)
 	return s, err
 }
 
@@ -120,8 +120,8 @@ func (m *MySQL) ListBanners() ([]model.Banner, error) {
 func (m *MySQL) UpdateBanner(s model.Banner) error {
 	tx := m.conn.MustBegin()
 	tx.MustExec(
-		"UPDATE `banners` SET `banner_id` = ?, `name` = ?, `date` = ?, `show_kg` = ?, `show_wr` = ?, `click_kg` = ?, `click_wr` = ? WHERE `id` = ?",
-		s.BannerID, s.Name, s.Date, s.ShowKg, s.ShowWr, s.ClickKg, s.ClickWr, s.ID,
+		"UPDATE `banners` SET `banner_id` = ?, `name` = ?, `date` = ?, `show_kg` = ?, `show_wr` = ?, `click_kg` = ?, `click_wr` = ?, `btype` = ? WHERE `id` = ?",
+		s.BannerID, s.Name, s.Date, s.ShowKg, s.ShowWr, s.ClickKg, s.ClickWr, s.Btype, s.ID,
 	)
 	err := tx.Commit()
 
@@ -139,8 +139,8 @@ func (m *MySQL) DeleteBanner(id int64) error {
 }
 
 // SelectBannerByDate selects banners entries from database
-func (m *MySQL) SelectBannerByDate(id int64, start, end string) ([]model.Banner, error) {
+func (m *MySQL) SelectBannerByDate(id int64, btype, start, end string) ([]model.Banner, error) {
 	s := []model.Banner{}
-	err := m.conn.Select(&s, "SELECT * FROM `banners` WHERE `banner_id`=? AND `date`>=? AND `date`<=?", id, start, end)
+	err := m.conn.Select(&s, "SELECT * FROM `banners` WHERE `banner_id`=? AND `btype`=? AND `date`>=? AND `date`<=?", id, btype, start, end)
 	return s, err
 }
