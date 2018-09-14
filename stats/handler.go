@@ -87,6 +87,22 @@ func (s *ServerDB) GetPrerollStat(c echo.Context) error {
 	return c.JSON(http.StatusOK, stmt)
 }
 
+// GetBannerStat ...
+func (s *ServerDB) GetBannerStat(c echo.Context) error {
+	id := c.Param("id")
+	rid, _ := strconv.ParseInt(id, 10, 64)
+	stdate := c.QueryParam("start")
+	endate := c.QueryParam("end")
+
+	stmt, err := s.db.SelectBannerByDate(rid, stdate, endate)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return c.JSON(http.StatusOK, stmt)
+}
+
 // WritePrerollToDb ...
 func (s *ServerDB) WritePrerollToDb(preid, name, act string, geo int) error {
 	t1 := time.Now()
