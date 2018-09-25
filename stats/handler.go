@@ -40,6 +40,7 @@ func (s *ServerDB) StatBanner(c echo.Context) error {
 	mesto := c.QueryParam("mesto")
 	name := c.QueryParam("name")
 	btype := c.QueryParam("type")
+	total := c.QueryParam("total")
 
 	if mesto == "kg" {
 		geo = 1
@@ -47,7 +48,7 @@ func (s *ServerDB) StatBanner(c echo.Context) error {
 		geo = 0
 	}
 
-	_ = s.WriteBannerToDb(id, name, act, btype, geo)
+	_ = s.WriteBannerToDb(id, name, act, btype, total, geo)
 
 	return c.String(http.StatusOK, "id: "+id+", act: "+act+", name: "+name)
 }
@@ -179,7 +180,7 @@ func (s *ServerDB) WritePrerollToDb(preid, name, act string, geo int) error {
 }
 
 // WriteBannerToDb ...
-func (s *ServerDB) WriteBannerToDb(banid, name, act, btype string, geo int) error {
+func (s *ServerDB) WriteBannerToDb(banid, name, act, btype, total string, geo int) error {
 	t1 := time.Now()
 	dtime := gostrftime.Format("%Y-%m-%d", t1)
 
@@ -188,15 +189,20 @@ func (s *ServerDB) WriteBannerToDb(banid, name, act, btype string, geo int) erro
 	u.Date = dtime
 	u.Btype = btype
 
+	var count int64 = 1
+	if total != "" {
+		count, _ = strconv.ParseInt(total, 10, 64)
+	}
+
 	stmt, err := s.db.SelectBanner(u)
 	switch {
 	case err == sql.ErrNoRows:
 		if geo == 1 {
 			if act == "click" {
 				u.ShowKg = 0
-				u.ClickKg = 1
+				u.ClickKg = count
 			} else {
-				u.ShowKg = 1
+				u.ShowKg = count
 				u.ClickKg = 0
 			}
 			u.ShowWr = 0
@@ -204,9 +210,9 @@ func (s *ServerDB) WriteBannerToDb(banid, name, act, btype string, geo int) erro
 		} else {
 			if act == "click" {
 				u.ShowWr = 0
-				u.ClickWr = 1
+				u.ClickWr = count
 			} else {
-				u.ShowWr = 1
+				u.ShowWr = count
 				u.ClickWr = 0
 			}
 			u.ShowKg = 0
@@ -225,9 +231,9 @@ func (s *ServerDB) WriteBannerToDb(banid, name, act, btype string, geo int) erro
 		if geo == 1 {
 			if act == "click" {
 				u.ShowKg = stmt.ShowKg
-				u.ClickKg = stmt.ClickKg + 1
+				u.ClickKg = stmt.ClickKg + count
 			} else {
-				u.ShowKg = stmt.ShowKg + 1
+				u.ShowKg = stmt.ShowKg + count
 				u.ClickKg = stmt.ClickKg
 			}
 			u.ShowWr = stmt.ShowWr
@@ -235,9 +241,9 @@ func (s *ServerDB) WriteBannerToDb(banid, name, act, btype string, geo int) erro
 		} else {
 			if act == "click" {
 				u.ShowWr = stmt.ShowWr
-				u.ClickWr = stmt.ClickWr + 1
+				u.ClickWr = stmt.ClickWr + count
 			} else {
-				u.ShowWr = stmt.ShowWr + 1
+				u.ShowWr = stmt.ShowWr + count
 				u.ClickWr = stmt.ClickWr
 			}
 			u.ShowKg = stmt.ShowKg
